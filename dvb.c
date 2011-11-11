@@ -781,6 +781,9 @@ static struct dtv_property dvbs2_cmdargs[] = {
     { .cmd = DTV_DELIVERY_SYSTEM, .u.data = SYS_DVBS2 },
     { .cmd = DTV_PILOT,           .u.data = PILOT_AUTO },
     { .cmd = DTV_ROLLOFF,         .u.data = ROLLOFF_AUTO },
+#if DVBS2_MIS_IS_SUPPORTED
+    { .cmd = DTV_DVBS2_MIS_ID,    .u.data = 0 },
+#endif
     { .cmd = DTV_TUNE },
 };
 static struct dtv_properties dvbs2_cmdseq = {
@@ -842,6 +845,7 @@ static struct dtv_properties atsc_cmdseq = {
 #define PILOT 6
 #define TRANSMISSION 7
 #define ROLLOFF 7
+#define MIS 8
 #define HIERARCHY 8
 
 struct dtv_property pclear[] = {
@@ -916,6 +920,9 @@ static void FrontendSet( bool b_init )
             p->props[MODULATION].u.data = GetModulation();
             p->props[PILOT].u.data = GetPilot();
             p->props[ROLLOFF].u.data = GetRollOff();
+#if DVBS2_MIS_IS_SUPPORTED
+            p->props[MIS].u.data = i_mis;
+#endif
         }
         else
             p = &dvbs_cmdseq;
@@ -925,9 +932,10 @@ static void FrontendSet( bool b_init )
         p->props[FEC_INNER].u.data = GetFECInner(info.caps);
         p->props[FREQUENCY].u.data = FrontendDoDiseqc();
 
-        msg_Dbg( NULL, "tuning QPSK frontend to f=%d srate=%d inversion=%d fec=%d rolloff=%d modulation=%s pilot=%d",
+        msg_Dbg( NULL, "tuning QPSK frontend to f=%d srate=%d inversion=%d fec=%d rolloff=%d modulation=%s pilot=%d mis=%d",
                  i_frequency, i_srate, i_inversion, i_fec, i_rolloff,
-                 psz_modulation == NULL ? "legacy" : psz_modulation, i_pilot );
+                 psz_modulation == NULL ? "legacy" : psz_modulation, i_pilot,
+                 i_mis );
         break;
 
     case FE_ATSC:

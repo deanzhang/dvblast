@@ -24,6 +24,16 @@
 #include <netdb.h>
 #include <sys/socket.h>
 
+#if DVBAPI_VERSION >= 505
+    #define DVBS2_MIS_IS_SUPPORTED 1
+#endif
+
+/* Debug code to test mutistream with older DVB headers */
+#if 1 && DVBAPI_VERSION < 505
+    #define DVBS2_MIS_IS_SUPPORTED 1
+    #define DTV_DVBS2_MIS_ID 44
+#endif
+
 #define HAVE_CLOCK_NANOSLEEP
 #define HAVE_ICONV
 
@@ -163,6 +173,7 @@ extern int i_bandwidth;
 extern int i_inversion;
 extern char *psz_modulation;
 extern int i_pilot;
+extern int i_mis;
 extern int i_fec_lp;
 extern int i_guard;
 extern int i_transmission;

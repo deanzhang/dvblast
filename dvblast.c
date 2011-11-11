@@ -73,6 +73,7 @@ int b_tone = 0;
 int i_bandwidth = 8;
 char *psz_modulation = NULL;
 int i_pilot = -1;
+int i_mis = 0;
 int i_fec_lp = 999;
 int i_guard = -1;
 int i_transmission = -1;
@@ -442,7 +443,7 @@ void usage()
         "[-i <RT priority>] [-a <adapter>] [-n <frontend number>] [-S <diseqc>] "
         "[-f <frequency>|-D [<src host>[:<src port>]@]<src mcast>[:<port>][/<opts>]*|-A <ASI adapter>] "
         "[-s <symbol rate>] [-v <0|13|18>] [-p] [-b <bandwidth>] [-I <inversion>] "
-        "[-F <fec inner>] [-m <modulation] [-R <rolloff>] [-P <pilot>] [-K <fec lp>] "
+        "[-F <fec inner>] [-m <modulation] [-R <rolloff>] [-P <pilot>] [-K <fec lp>] [-k <dvbs2_mutistream_id>] "
         "[-G <guard interval>] [-H <hierarchy>] [-X <transmission>] [-O <lock timeout>] "
         "[-u] [-w] [-U] [-L <latency>] [-E <retention>] [-d <dest IP>[<:port>][/<opts>]*] "
         "[-z] [-C [-e] [-M <network name] [-N <network ID>]] [-T] [-j <system charset>] "
@@ -467,6 +468,7 @@ void usage()
     msg_Raw( NULL, "  -P --pilot            DVB-S2 Pilot (-1 auto, 0 off, 1 on)" );
     msg_Raw( NULL, "  -R --rolloff          DVB-S2 Rolloff value" );
     msg_Raw( NULL, "    DVB-S2 35=0.35|25=0.25|20=0.20|0=AUTO (default: 35)" );
+    msg_Raw( NULL, "  -k --multistream-id   DVB-S2 multistream id (0-255, default: 0) /Only with DVB API >= 5.5?/" );
     msg_Raw( NULL, "  -K --fec-lp           DVB-T low priority FEC (default auto)" );
     msg_Raw( NULL, "  -G --guard            DVB-T guard interval" );
     msg_Raw( NULL, "    DVB-T  32 (1/32)|16 (1/16)|8 (1/8)|4 (1/4)|-1 (auto, default)" );
@@ -532,7 +534,7 @@ int main( int i_argc, char **pp_argv )
         usage();
 
     /*
-     * The only short options left are: ky0123456789
+     * The only short options left are: y0123456789
      * Use them wisely.
      */
     static const struct option long_options[] =
@@ -555,6 +557,7 @@ int main( int i_argc, char **pp_argv )
         { "inversion",       required_argument, NULL, 'I' },
         { "modulation",      required_argument, NULL, 'm' },
         { "pilot",           required_argument, NULL, 'P' },
+        { "mutistream-id",   required_argument, NULL, 'k' },
         { "fec-lp",          required_argument, NULL, 'K' },
         { "guard",           required_argument, NULL, 'G' },
         { "hierarchy",       required_argument, NULL, 'H' },
@@ -590,7 +593,7 @@ int main( int i_argc, char **pp_argv )
         { 0, 0, 0, 0 }
     };
 
-    while ( (c = getopt_long(i_argc, pp_argv, "q::c:r:t:o:i:a:n:f:F:R:s:S:v:pb:I:m:P:K:G:H:X:O:uwUTL:E:d:D:A:lg:zCWYeM:N:j:J:B:x:Q:hVZ:", long_options, NULL)) != -1 )
+    while ( (c = getopt_long(i_argc, pp_argv, "q::c:r:t:o:i:a:n:f:F:R:s:S:v:pb:I:m:P:k:K:G:H:X:O:uwUTL:E:d:D:A:lg:zCWYeM:N:j:J:B:x:Q:hVZ:", long_options, NULL)) != -1 )
     {
         switch ( c )
         {
@@ -699,6 +702,10 @@ int main( int i_argc, char **pp_argv )
 
         case 'P':
             i_pilot = strtol( optarg, NULL, 0 );
+            break;
+
+        case 'k':
+            i_mis = strtol( optarg, NULL, 0 );
             break;
 
         case 'K':
