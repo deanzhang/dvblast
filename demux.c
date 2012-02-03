@@ -431,6 +431,11 @@ static void demux_Handle( block_t *p_ts )
                 {
                     p_output->i_nb_errors++;
                     p_output->i_last_error = i_wallclock;
+                    if ( p_output->i_nb_errors <= MAX_ERRORS )
+                    {
+                        block_Delete( p_ts );
+                        return;
+                    }
                 }
                 else if ( i_wallclock > p_output->i_last_error + WATCHDOG_WAIT )
                     p_output->i_nb_errors = 0;
@@ -445,6 +450,8 @@ static void demux_Handle( block_t *p_ts )
                              "too many errors for stream %s, resetting",
                              p_output->config.psz_displayname );
                     en50221_Reset();
+                    block_Delete( p_ts );
+                    return;
                 }
             }
 
